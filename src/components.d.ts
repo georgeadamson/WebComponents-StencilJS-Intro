@@ -13,8 +13,12 @@ import 'ionicons';
 
 export namespace Components {
 
-  interface HelloWorld {}
-  interface HelloWorldAttributes extends StencilHTMLAttributes {}
+  interface HelloWorld {
+    'label': string;
+  }
+  interface HelloWorldAttributes extends StencilHTMLAttributes {
+    'label'?: string;
+  }
 }
 
 declare global {
