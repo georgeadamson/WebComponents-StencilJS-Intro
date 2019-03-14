@@ -1,0 +1,8 @@
+html.plt-mobile ion-app {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }
+
+ion-app.force-statusbar-padding {
+  --ion-safe-area-top: 20px; }
