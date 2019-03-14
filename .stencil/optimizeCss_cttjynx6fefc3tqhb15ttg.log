@@ -1,0 +1,72 @@
+:host,
+hello-world {
+  display: inline-block;
+  outline: 1px dashed #aaa;
+  width: 300px;
+  height: 300px; }
+  :host[loading],
+  hello-world[loading] {
+    display: inline-block;
+    position: relative; }
+    :host[loading]:after,
+    hello-world[loading]:after {
+      width: 48px;
+      height: 48px;
+      content: '';
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      margin: -24px 0 0 -24px;
+      border-radius: 50%;
+      border: 5px solid;
+      border-color: #aaa transparent;
+      -webkit-animation: delay-show 1s, spinner 1s linear infinite;
+      animation: delay-show 1s, spinner 1s linear infinite; }
+
+@-webkit-keyframes delay-show {
+  0% {
+    opacity: 0; }
+  99% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes delay-show {
+  0% {
+    opacity: 0; }
+  99% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@-webkit-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+
+@keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+  :host .img-wrapper,
+  hello-world .img-wrapper {
+    background: #eee;
+    outline: 1px dashed #aaa;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 100%;
+    height: 100%; }
+  :host img,
+  hello-world img {
+    width: 100%; }
