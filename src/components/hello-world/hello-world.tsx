@@ -8,6 +8,8 @@ export class AppRoot {
   @Prop() label: string = 'My attr default';
 
   render() {
-    return <div>Hello world {this.label}</div>;
+    const { label } = this;
+
+    return <div>Hello world {label}</div>;
   }
 }
