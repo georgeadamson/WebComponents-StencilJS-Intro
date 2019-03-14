@@ -5,7 +5,7 @@ import { Component, Prop } from '@stencil/core';
   styleUrl: 'hello-world.css'
 })
 export class AppRoot {
-  @Prop() label: string;
+  @Prop() label: string = 'My attr default';
 
   render() {
     return <div>Hello world {this.label}</div>;
