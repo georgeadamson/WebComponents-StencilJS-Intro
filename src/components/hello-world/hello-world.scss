@@ -1,0 +1,26 @@
+@import './spinner';
+
+:host,
+hello-world {
+  display: inline-block;
+  outline: 1px dashed #aaa;
+  width: 300px;
+  height: 300px;
+
+  &[loading] {
+    @include spinner();
+  }
+
+  .img-wrapper {
+    background: #eee;
+    outline: 1px dashed #aaa;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    width: 100%;
+  }
+}

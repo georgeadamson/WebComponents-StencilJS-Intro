@@ -14,10 +14,12 @@ import 'ionicons';
 export namespace Components {
 
   interface HelloWorld {
-    'label': string;
+    'alt': string;
+    'src': string;
   }
   interface HelloWorldAttributes extends StencilHTMLAttributes {
-    'label'?: string;
+    'alt'?: string;
+    'src'?: string;
   }
 }
 

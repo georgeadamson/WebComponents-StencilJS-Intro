@@ -1,0 +1,50 @@
+// Usage: @import './spinner';
+//        @include
+@mixin spinner($size: 48px, $color: #aaa, $delay: 1s, $speed: 1s) {
+  display: inline-block;
+  position: relative;
+
+  &:after {
+    // Size:
+    width: $size;
+    height: $size;
+
+    // Position:
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: (-0.5 * $size) 0 0 (-0.5 * $size);
+
+    // Make it look like a spinner:
+    border-radius: 50%;
+    border: 5px solid;
+    border-color: $color transparent;
+    animation: delay-show $delay, spinner $speed linear infinite;
+  }
+
+  // To delay visibility of an element until the end of an animation duration:
+  @keyframes delay-show {
+    0% {
+      opacity: 0;
+    }
+    99% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  // To rotate an element once per animation cycle:
+  @keyframes spinner {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}

@@ -1728,4 +1728,4 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
   // but note that the components have not fully loaded yet
   App.initialized = true;
 })(n, x, w, d, r, h, c);
-})(window,document,{},"App","hydrated",[["hello-world","hello-world",1,[["label",1,0,1,2]]]]);
+})(window,document,{},"App","hydrated",[["hello-world","hello-world",1,[["alt",1,0,1,2],["src",1,0,1,2]]]]);
