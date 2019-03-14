@@ -86,4 +86,4 @@ function debounce(func, wait = 0) {
     };
 }
 
-export { hasShadowDom as a, findItemLabel as b, renderHiddenInput as c, rIC as d, assert as e, debounce as f, now as g, pointerCoord as h };
+export { findItemLabel as a, renderHiddenInput as b, hasShadowDom as c };

@@ -131,4 +131,4 @@ function createComponentOnReadyPrototype(win, namespace, HTMLElementPrototype) {
 
   init(win, doc, namespace, fsNamespace, resourcesUrl, appCore, appCoreSsr, appCorePolyfilled, hydratedCssClass, components);
 
-  })(window, document, "App","app",0,"app.core.js","es5-build-disabled.js","hydrated","app-home,app-profile,app-root,ion-app,ion-back-button,ion-button,ion-buttons,ion-content,ion-header,ion-icon,ion-item,ion-label,ion-nav,ion-ripple-effect,ion-route,ion-router,ion-title,ion-toggle,ion-toolbar",HTMLElement.prototype);
+  })(window, document, "App","app",0,"app.core.js","es5-build-disabled.js","hydrated","hello-world",HTMLElement.prototype);
