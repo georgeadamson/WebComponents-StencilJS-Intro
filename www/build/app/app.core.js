@@ -314,12 +314,14 @@ const setAccessor = (plt, elm, memberName, oldValue, newValue, isSvg, isHostElem
     // - all svgs get values as attributes not props
     // - check if elm contains name or if the value is array, object, or function
     const cmpMeta = plt.getComponentMeta(elm);
-    cmpMeta && cmpMeta.membersMeta && cmpMeta.membersMeta[memberName] ? 
+    cmpMeta && cmpMeta.membersMeta && cmpMeta.membersMeta[memberName] ? (
     // we know for a fact that this element is a known component
     // and this component has this member name as a property,
     // let's set the known @Prop on this element
     // set it directly as property on the element
-    setProperty(elm, memberName, newValue) : 'ref' !== memberName && (
+    setProperty(elm, memberName, newValue), isHostElement && cmpMeta.membersMeta[memberName].reflectToAttrib && 
+    // we also want to set this data to the attribute
+    updateAttribute(elm, cmpMeta.membersMeta[memberName].attribName, newValue, 4 /* Boolean */ === cmpMeta.membersMeta[memberName].propType)) : 'ref' !== memberName && (
     // this member name is a property on this element, but it's not a component
     // this is a native property like "value" or something
     // also we can ignore the "ref" member name at this point
@@ -1045,6 +1047,13 @@ const parsePropertyValue = (propType, propValue) => {
     return propValue;
 };
 
+const reflectInstanceValuesToHostAttributes = (properties, instance, reflectHostAttr) => {
+  return properties && Object.keys(properties).forEach(memberName => {
+    properties[memberName].reflectToAttr && (reflectHostAttr = reflectHostAttr || {}, 
+    reflectHostAttr[memberName] = instance[memberName]);
+  }), reflectHostAttr;
+};
+
 const queueUpdate = (plt, elm, perf) => {
   // we're actively processing this component
   plt.processingCmp.add(elm), 
@@ -1098,7 +1107,8 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
                 const useNativeShadowDom = false;
         let reflectHostAttr;
         let rootElm = hostElm;
-        if (!hostElm['s-rn']) {
+        if (reflectHostAttr = reflectInstanceValuesToHostAttributes(cmpMeta.componentConstructor.properties, instance), 
+        !hostElm['s-rn']) {
           // attach the styles this component needs, if any
           // this fn figures out if the styles should go in a
           // shadow root or if they should be global
@@ -1113,6 +1123,7 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
           plt.activeRender = true;
           const vnodeChildren = instance.render && instance.render();
           let vnodeHostData;
+          reflectHostAttr && (vnodeHostData = vnodeHostData ? Object.assign(vnodeHostData, reflectHostAttr) : reflectHostAttr), 
           // tell the platform we're done rendering
           // now any changes will again queue
           plt.activeRender = false;
@@ -1123,6 +1134,8 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
           // if this is a re-render, then give the renderer the last vnode we already created
                     const oldVNode = plt.vnodeMap.get(hostElm) || {};
           oldVNode.elm = rootElm, 
+          // only care if we're reflecting values to the host element
+          hostVNode.ishost = true, 
           // each patch always gets a new vnode
           // the host element itself isn't patched because it already exists
           // kick off the actual render and any DOM updates
@@ -1145,9 +1158,9 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
 };
 
 const defineMember = (plt, property, elm, instance, memberName, hostSnapshot, perf, hostAttributes, hostAttrValue) => {
-  if (property.type || false) {
+  if (property.type || property.state) {
     const values = plt.valuesMap.get(elm);
-    !property.attr || void 0 !== values[memberName] && '' !== values[memberName] || 
+    !property.state && true && (!property.attr || void 0 !== values[memberName] && '' !== values[memberName] || 
     // check the prop value from the host element attribute
     (hostAttributes = hostSnapshot && hostSnapshot.$attributes) && isDef(hostAttrValue = hostAttributes[property.attr]) && (
     // looks like we've got an attribute value
@@ -1168,7 +1181,7 @@ const defineMember = (plt, property, elm, instance, memberName, hostSnapshot, pe
     // for the client only, let's delete its "own" property
     // this way our already assigned getter/setter on the prototype kicks in
     // the very special case is to NOT do this for "mode"
-    'mode' !== memberName && delete elm[memberName]), instance.hasOwnProperty(memberName) && void 0 === values[memberName] && (
+    'mode' !== memberName && delete elm[memberName])), instance.hasOwnProperty(memberName) && void 0 === values[memberName] && (
     // @Prop() or @Prop({mutable:true}) or @State()
     // we haven't yet got a value from the above checks so let's
     // read any "own" property instance values already set
@@ -1183,7 +1196,7 @@ const defineMember = (plt, property, elm, instance, memberName, hostSnapshot, pe
       return values = plt.valuesMap.get(plt.hostElementMap.get(this)), values && values[memberName];
     }, function setComponentProp(newValue, elm) {
       // component instance prop/state setter (cannot be arrow fn)
-      elm = plt.hostElementMap.get(this), elm && (property.mutable ? setValue(plt, elm, memberName, newValue, perf) : console.warn(`@Prop() "${memberName}" on "${elm.tagName}" cannot be modified.`));
+      elm = plt.hostElementMap.get(this), elm && (property.state || property.mutable ? setValue(plt, elm, memberName, newValue, perf) : console.warn(`@Prop() "${memberName}" on "${elm.tagName}" cannot be modified.`));
     });
   } else false;
 };
@@ -1406,11 +1419,11 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
       // all is good, this component has been told it's time to finish loading
       // it's possible that we've already decided to destroy this element
       // check if this element has any actively loading child elements
-      if (plt.instanceMap.get(elm) && !plt.isDisconnectedMap.has(elm) && (!elm['s-ld'] || !elm['s-ld'].length)) {
+      if ((instance = plt.instanceMap.get(elm)) && !plt.isDisconnectedMap.has(elm) && (!elm['s-ld'] || !elm['s-ld'].length)) {
         // cool, so at this point this element isn't already being destroyed
         // and it does not have any child elements that are still loading
         // all of this element's children have loaded (if any)
-        plt.isCmpReady.set(elm, true), plt.isCmpLoaded.has(elm) || (
+        plt.isCmpReady.set(elm, true), (hasCmpLoaded = plt.isCmpLoaded.has(elm)) || (
         // remember that this component has loaded
         // isCmpLoaded map is useful to know if we should fire
         // the lifecycle componentDidLoad() or componentDidUpdate()
@@ -1425,7 +1438,7 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
           // fire off the user's elm.componentOnReady() callbacks that were
           // put directly on the element (well before anything was ready)
           (onReadyCallbacks = plt.onReadyCallbacksMap.get(elm)) && (onReadyCallbacks.forEach(cb => cb(elm)), 
-          plt.onReadyCallbacksMap.delete(elm));
+          plt.onReadyCallbacksMap.delete(elm)), !hasCmpLoaded && instance.componentDidLoad && instance.componentDidLoad();
         } catch (e) {
           plt.onError(e, 4 /* DidLoadError */ , elm);
         }
@@ -1728,4 +1741,4 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
   // but note that the components have not fully loaded yet
   App.initialized = true;
 })(n, x, w, d, r, h, c);
-})(window,document,{},"App","hydrated",[["hello-world","hello-world",1,[["alt",1,0,1,2],["src",1,0,1,2]]]]);
+})(window,document,{},"App","hydrated",[["hello-world","hello-world",1,[["alt",1,0,1,2],["loaded",16],["loading",2,1,1,4],["src",1,0,1,2]]]]);

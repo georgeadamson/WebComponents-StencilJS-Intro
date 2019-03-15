@@ -1,24 +1,30 @@
-import { Component, Prop } from '@stencil/core';
+import { Component, Prop, State } from '@stencil/core';
 
 @Component({
   tag: 'hello-world',
   styleUrl: 'hello-world.scss'
 })
 export class DemoImg {
-  @Prop() src: string = 'https://source.unsplash.com/random/200x200';
-  @Prop() alt: string;
+  @Prop() src: string = 'https://source.unsplash.com/random/400x400';
+  @Prop() alt: string = '';
+
+  @Prop({ mutable: true, reflectToAttr: true }) loading: boolean;
+
+  @State() loaded: boolean;
+
+  componentDidLoad() {
+    this.loading = true;
+  }
+
+  onLoad = () => {
+    this.loaded = true;
+    this.loading = false;
+  };
 
   render() {
-    let { src, alt } = this;
+    const { src, alt, loaded, onLoad } = this;
+    const className = loaded ? 'loaded' : 'loading';
 
-    if (typeof alt !== 'string') {
-      src = null;
-      alt = 'Missing alt YOU MUPPET! 🤦‍';
-    } else if (!src) {
-      src = null;
-      alt = "Duh, give it some src! It ain't 🚀 science!";
-    }
-
-    return <img src={src} alt={alt} />;
+    return <img src={src} alt={alt} class={className} onLoad={onLoad} />;
   }
 }

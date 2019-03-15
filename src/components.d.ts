@@ -15,10 +15,12 @@ export namespace Components {
 
   interface HelloWorld {
     'alt': string;
+    'loading': boolean;
     'src': string;
   }
   interface HelloWorldAttributes extends StencilHTMLAttributes {
     'alt'?: string;
+    'loading'?: boolean;
     'src'?: string;
   }
 }
