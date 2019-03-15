@@ -2,3 +2,4 @@ package-lock.json
 components.d.ts
 node_modules/
 www/build/
+*.log
