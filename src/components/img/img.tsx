@@ -115,6 +115,9 @@ export class ImgComponent {
   //   reset.call(this);
   // }
 
+  // Private: Will store array of children passed into component.
+  children: Element[];
+
   // Private: This component:
   @Element() host: HTMLDivElement;
 
@@ -122,6 +125,10 @@ export class ImgComponent {
   private aspectRatio: number;
 
   componentWillLoad() {
+    this.children = Array.from(this.host.children);
+
+    console.log(this.children);
+
     reset.call(this);
   }
 
