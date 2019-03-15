@@ -40,6 +40,7 @@ export class DemoImg {
 
   @State() loaded: boolean;
 
+  // See: https://stenciljs.com/docs/component-lifecycle
   componentDidLoad() {
     this.loading = true;
   }
