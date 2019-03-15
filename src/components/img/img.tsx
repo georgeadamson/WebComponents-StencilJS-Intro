@@ -13,8 +13,8 @@ import observeScrollIntoView from '../../helpers/dom/observeScrollIntoView';
  */
 @Component({
   tag: 'lazy-img',
-  styleUrl: 'img.scss'
-  //,shadow: true
+  styleUrl: 'img.scss',
+  shadow: true
 })
 export class ImgComponent {
   /** Optional. The alternative text description of the image.
@@ -222,10 +222,11 @@ export class ImgComponent {
       // By default the placeholder slot will contain an element that can be styled as a spinner:
       placeholderElem = (
         <div class="placeholder" aria-hidden="true">
-          <slot name="placeholder" />
-          {loading && aspectRatio && !noloading ? (
-            <i class="loading-indicator" />
-          ) : null}
+          <slot name="placeholder">
+            {loading && aspectRatio && !noloading ? (
+              <i class="loading-indicator" />
+            ) : null}
+          </slot>
         </div>
       );
     } else if (fallback) {
