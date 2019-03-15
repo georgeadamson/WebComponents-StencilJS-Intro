@@ -13,42 +13,132 @@ import 'ionicons';
 
 export namespace Components {
 
-  interface HelloWorld {
+  interface LazyImg {
+    /**
+    * Optional. The alternative text description of the image. Omit this for *decorative* images and it will default to an empty string. When should I set the alt attribute? https://www.w3.org/WAI/tutorials/images/decision-tree/
+    */
     'alt': string;
+    'fallback': boolean;
+    'forceState': boolean;
+    /**
+    * Optional. Used to calculate aspect ratio when both `width` and `height` have been specified. Setting these correctly will prevent reflow when image finally loads. Note: This does not have the same effect as the standard img `height` attribute. Similar to amp-img: https://www.ampproject.org/docs/reference/components/amp-img Also see: https://github.com/ojanvafai/intrinsicsize-attribute
+    */
+    'height': string;
+    /**
+    * Optional. Specify how the image will display within the component. Similar to amp-img layout: https://www.ampproject.org/docs/design/responsive/control_layout When height and width are specified, the component will size itself using height/width aspect ratio. - responsive: Component will adjust to native image size after it loads. - fixed: Image will distort to fit both height and width of component. - cover: Image will zoom in to fit either height or width of component. - contain: Image will zoom out to fit within height and width of component.
+    */
+    'layout': 'responsive' | 'fixed' | 'cover' | 'contain';
+    'lazing': boolean;
+    /**
+    * Optional. When set, the image will not be fetched until it is scrolled into view. Recommended for faster page load.
+    */
+    'lazyload': boolean;
+    'loaded': boolean;
     'loading': boolean;
+    /**
+    * Optional. When this is set, no element will be rendered for a spinner animation while waiting for load.
+    */
+    'noloading': boolean;
+    /**
+    * Optional. A comma separated list of one or more strings indicating a set of source sizes. Each source size consists of: - a media condition. This must be omitted for the last item. - a source size value. More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-sizes
+    */
+    'sizes': string;
+    /**
+    * Required. The image URL. More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-src
+    */
     'src': string;
-    'whatIsAlt': () => void;
+    /**
+    * Optional. A comma separated list of one or more strings indicating a set of possible image sources for the user agent to use. More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
+    */
+    'srcset': string;
+    /**
+    * Optional. Used to calculate aspect ratio when both `width` and `height` have been specified. Setting these correctly will prevent reflow when image finally loads. Note: This does not have the same effect as the standard img `width` attribute. Similar to amp-img: https://www.ampproject.org/docs/reference/components/amp-img Also see: https://github.com/ojanvafai/intrinsicsize-attribute
+    */
+    'width': string;
+    /**
+    * Optional. Emit user events such as `lazyloading` and `tracking`. For example img load events may be needed for analytics tracking.
+    */
+    'withEvents': boolean;
   }
-  interface HelloWorldAttributes extends StencilHTMLAttributes {
-    'alt'?: string;
+  interface LazyImgAttributes extends StencilHTMLAttributes {
+    /**
+    * Optional. The alternative text description of the image. Omit this for *decorative* images and it will default to an empty string. When should I set the alt attribute? https://www.w3.org/WAI/tutorials/images/decision-tree/
+    */
+    'alt': string;
+    'fallback'?: boolean;
+    'forceState'?: boolean;
+    /**
+    * Optional. Used to calculate aspect ratio when both `width` and `height` have been specified. Setting these correctly will prevent reflow when image finally loads. Note: This does not have the same effect as the standard img `height` attribute. Similar to amp-img: https://www.ampproject.org/docs/reference/components/amp-img Also see: https://github.com/ojanvafai/intrinsicsize-attribute
+    */
+    'height'?: string;
+    /**
+    * Optional. Specify how the image will display within the component. Similar to amp-img layout: https://www.ampproject.org/docs/design/responsive/control_layout When height and width are specified, the component will size itself using height/width aspect ratio. - responsive: Component will adjust to native image size after it loads. - fixed: Image will distort to fit both height and width of component. - cover: Image will zoom in to fit either height or width of component. - contain: Image will zoom out to fit within height and width of component.
+    */
+    'layout'?: 'responsive' | 'fixed' | 'cover' | 'contain';
+    'lazing'?: boolean;
+    /**
+    * Optional. When set, the image will not be fetched until it is scrolled into view. Recommended for faster page load.
+    */
+    'lazyload'?: boolean;
+    'loaded'?: boolean;
     'loading'?: boolean;
-    'onHelloWorld'?: (event: CustomEvent) => void;
+    /**
+    * Optional. When this is set, no element will be rendered for a spinner animation while waiting for load.
+    */
+    'noloading'?: boolean;
+    /**
+    * This component emits `lazyloading` event when it is scrolled into view.
+    */
+    'onLazyloading'?: (event: CustomEvent) => void;
+    /**
+    * This component emits `tracking` events for the tracking component to handle.
+    */
+    'onTracking'?: (event: CustomEvent) => void;
+    /**
+    * Optional. A comma separated list of one or more strings indicating a set of source sizes. Each source size consists of: - a media condition. This must be omitted for the last item. - a source size value. More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-sizes
+    */
+    'sizes'?: string;
+    /**
+    * Required. The image URL. More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-src
+    */
     'src'?: string;
+    /**
+    * Optional. A comma separated list of one or more strings indicating a set of possible image sources for the user agent to use. More info: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
+    */
+    'srcset'?: string;
+    /**
+    * Optional. Used to calculate aspect ratio when both `width` and `height` have been specified. Setting these correctly will prevent reflow when image finally loads. Note: This does not have the same effect as the standard img `width` attribute. Similar to amp-img: https://www.ampproject.org/docs/reference/components/amp-img Also see: https://github.com/ojanvafai/intrinsicsize-attribute
+    */
+    'width'?: string;
+    /**
+    * Optional. Emit user events such as `lazyloading` and `tracking`. For example img load events may be needed for analytics tracking.
+    */
+    'withEvents'?: boolean;
   }
 }
 
 declare global {
   interface StencilElementInterfaces {
-    'HelloWorld': Components.HelloWorld;
+    'LazyImg': Components.LazyImg;
   }
 
   interface StencilIntrinsicElements {
-    'hello-world': Components.HelloWorldAttributes;
+    'lazy-img': Components.LazyImgAttributes;
   }
 
 
-  interface HTMLHelloWorldElement extends Components.HelloWorld, HTMLStencilElement {}
-  var HTMLHelloWorldElement: {
-    prototype: HTMLHelloWorldElement;
-    new (): HTMLHelloWorldElement;
+  interface HTMLLazyImgElement extends Components.LazyImg, HTMLStencilElement {}
+  var HTMLLazyImgElement: {
+    prototype: HTMLLazyImgElement;
+    new (): HTMLLazyImgElement;
   };
 
   interface HTMLElementTagNameMap {
-    'hello-world': HTMLHelloWorldElement
+    'lazy-img': HTMLLazyImgElement
   }
 
   interface ElementTagNameMap {
-    'hello-world': HTMLHelloWorldElement;
+    'lazy-img': HTMLLazyImgElement;
   }
 
 

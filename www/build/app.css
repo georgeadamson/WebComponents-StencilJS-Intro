@@ -38,3 +38,8 @@ html{font-family:var(--ion-font-family)}a{background-color:transparent;color:var
   More info about color theming using Ionic:
   https://beta.ionicframework.com/docs/theming/color-generator
 */
+
+html,
+body {
+  overflow: scroll;
+}

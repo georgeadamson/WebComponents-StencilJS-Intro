@@ -269,7 +269,7 @@ const attachStyles = (plt, domApi, cmpMeta, hostElm) => {
   // create the style id w/ the host element's mode
   let styleId = cmpMeta.tagNameMeta + DEFAULT_STYLE_MODE;
   let styleTemplate = cmpMeta[styleId];
-  // if (false || false) {
+  // if (false || true) {
     const shouldScopeCss = 2 /* ScopedCss */ === cmpMeta.encapsulationMeta || 1 /* ShadowDom */ === cmpMeta.encapsulationMeta && !plt.domApi.$supportsShadowDom;
   if (shouldScopeCss && (hostElm['s-sc'] = styleTemplate ? getScopeId(cmpMeta, hostElm.mode) : getScopeId(cmpMeta)), 
   styleTemplate) {
@@ -277,11 +277,18 @@ const attachStyles = (plt, domApi, cmpMeta, hostElm) => {
     let styleContainerNode = domApi.$doc.head;
     // if this browser supports shadow dom, then let's climb up
     // the dom and see if we're within a shadow dom
-        false;
+        if (domApi.$supportsShadowDom) if (1 /* ShadowDom */ === cmpMeta.encapsulationMeta) 
+    // we already know we're in a shadow dom
+    // so shadow root is the container for these styles
+    styleContainerNode = hostElm.shadowRoot; else {
+      // climb up the dom and see if we're in a shadow dom
+      const rootEl = hostElm.getRootNode();
+      rootEl.host && (styleContainerNode = rootEl);
+    }
     // if this container element already has these styles
     // then there's no need to apply them again
     // create an object to keep track if we'ready applied this component style
-    let appliedStyles = plt.componentAppliedStyles.get(styleContainerNode);
+        let appliedStyles = plt.componentAppliedStyles.get(styleContainerNode);
     // check if we haven't applied these styles to this container yet
     if (appliedStyles || plt.componentAppliedStyles.set(styleContainerNode, appliedStyles = {}), 
     !appliedStyles[styleId]) {
@@ -307,8 +314,6 @@ const isDef = v => null != v;
 const toLowerCase = str => str.toLowerCase();
 
 const dashToPascalCase = str => toLowerCase(str).split('-').map(segment => segment.charAt(0).toUpperCase() + segment.slice(1)).join('');
-
-const noop = () => {};
 
 const updateAttribute = (elm, memberName, newValue, isBooleanAttr = 'boolean' === typeof newValue, isXlinkNs) => {
   isXlinkNs = memberName !== (memberName = memberName.replace(/^xlink\:?/, '')), null == newValue || isBooleanAttr && (!newValue || 'false' === newValue) ? isXlinkNs ? elm.removeAttributeNS(XLINK_NS$1, toLowerCase(memberName)) : elm.removeAttribute(memberName) : 'function' !== typeof newValue && (newValue = isBooleanAttr ? '' : newValue.toString(), 
@@ -960,6 +965,13 @@ const initHostSnapshot = (domApi, cmpMeta, hostElm, hostSnapshot, attribName) =>
   // create a node to represent where the original
   // content was first placed, which is useful later on
   hostElm['s-cr'] = domApi.$createTextNode(''), hostElm['s-cr']['s-cn'] = true, domApi.$insertBefore(hostElm, hostElm['s-cr'], domApi.$childNodes(hostElm)[0])), 
+  1 /* ShadowDom */ === cmpMeta.encapsulationMeta && domApi.$supportsShadowDom && !hostElm.shadowRoot && 
+  // this component is using shadow dom
+  // and this browser supports shadow dom
+  // add the read-only property "shadowRoot" to the host element
+  domApi.$attachShadow(hostElm, {
+    mode: 'open'
+  }), 
   // create a host snapshot object we'll
   // use to store all host data about to be read later
   hostSnapshot = {
@@ -1104,7 +1116,17 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
       // haven't created a component instance for this host element yet!
       // create the instance from the user's component class
       // https://www.youtube.com/watch?v=olLxrojmvMg
-            instance = initComponentInstance(plt, elm, plt.hostSnapshotMap.get(elm), perf);
+            if (instance = initComponentInstance(plt, elm, plt.hostSnapshotMap.get(elm), perf), 
+      instance) 
+      // this is the initial load and the instance was just created
+      // fire off the user's componentWillLoad method (if one was provided)
+      // componentWillLoad only runs ONCE, after instance's element has been
+      // assigned as the host element, but BEFORE render() has been called
+      try {
+        instance.componentWillLoad && await instance.componentWillLoad();
+      } catch (e) {
+        plt.onError(e, 3 /* WillLoadError */ , elm);
+      }
     } else false;
     // if this component has a render function, let's fire
     // it off and generate a vnode for this
@@ -1117,11 +1139,17 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
         const encapsulation = cmpMeta.componentConstructor.encapsulation;
         // test if this component should be shadow dom
         // and if so does the browser supports it
-                const useNativeShadowDom = false;
+                const useNativeShadowDom = 'shadow' === encapsulation && plt.domApi.$supportsShadowDom;
         let reflectHostAttr;
         let rootElm = hostElm;
         if (reflectHostAttr = reflectInstanceValuesToHostAttributes(cmpMeta.componentConstructor.properties, instance), 
-        !hostElm['s-rn']) {
+        // this component SHOULD use native slot/shadow dom
+        // this browser DOES support native shadow dom
+        // and this is the first render
+        // let's create that shadow root
+        // test if this component should be shadow dom
+        // and if so does the browser supports it
+        useNativeShadowDom && (rootElm = hostElm.shadowRoot), !hostElm['s-rn']) {
           // attach the styles this component needs, if any
           // this fn figures out if the styles should go in a
           // shadow root or if they should be global
@@ -1171,9 +1199,9 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
 };
 
 const defineMember = (plt, property, elm, instance, memberName, hostSnapshot, perf, hostAttributes, hostAttrValue) => {
-  if (property.type || property.state) {
+  if (property.type || false) {
     const values = plt.valuesMap.get(elm);
-    !property.state && true && (!property.attr || void 0 !== values[memberName] && '' !== values[memberName] || 
+    !property.attr || void 0 !== values[memberName] && '' !== values[memberName] || 
     // check the prop value from the host element attribute
     (hostAttributes = hostSnapshot && hostSnapshot.$attributes) && isDef(hostAttrValue = hostAttributes[property.attr]) && (
     // looks like we've got an attribute value
@@ -1194,13 +1222,13 @@ const defineMember = (plt, property, elm, instance, memberName, hostSnapshot, pe
     // for the client only, let's delete its "own" property
     // this way our already assigned getter/setter on the prototype kicks in
     // the very special case is to NOT do this for "mode"
-    'mode' !== memberName && delete elm[memberName])), instance.hasOwnProperty(memberName) && void 0 === values[memberName] && (
+    'mode' !== memberName && delete elm[memberName]), instance.hasOwnProperty(memberName) && void 0 === values[memberName] && (
     // @Prop() or @Prop({mutable:true}) or @State()
     // we haven't yet got a value from the above checks so let's
     // read any "own" property instance values already set
     // to our internal value as the source of getter data
     // we're about to define a property and it'll overwrite this "own" property
-    values[memberName] = instance[memberName]), property.watchCallbacks && (values[WATCH_CB_PREFIX + memberName] = property.watchCallbacks.slice()), 
+    values[memberName] = instance[memberName]), 
     // add getter/setter to the component instance
     // these will be pointed to the internal data set from the above checks
     definePropertyGetterSetter(instance, memberName, function getComponentProp(values) {
@@ -1209,13 +1237,13 @@ const defineMember = (plt, property, elm, instance, memberName, hostSnapshot, pe
       return values = plt.valuesMap.get(plt.hostElementMap.get(this)), values && values[memberName];
     }, function setComponentProp(newValue, elm) {
       // component instance prop/state setter (cannot be arrow fn)
-      elm = plt.hostElementMap.get(this), elm && (property.state || property.mutable ? setValue(plt, elm, memberName, newValue, perf) : console.warn(`@Prop() "${memberName}" on "${elm.tagName}" cannot be modified.`));
+      elm = plt.hostElementMap.get(this), elm && (property.mutable ? setValue(plt, elm, memberName, newValue, perf) : console.warn(`@Prop() "${memberName}" on "${elm.tagName}" cannot be modified.`));
     });
-  } else property.method && 
-  // @Method()
-  // add a property "value" on the host element
-  // which we'll bind to the instance's method
-  definePropertyValue(elm, memberName, instance[memberName].bind(instance));
+  } else property.elementRef && 
+  // @Element()
+  // add a getter to the element reference using
+  // the member name the component meta provided
+  definePropertyValue(instance, memberName, elm);
 };
 
 const setValue = (plt, elm, memberName, newVal, perf, instance, values) => {
@@ -1224,29 +1252,16 @@ const setValue = (plt, elm, memberName, newVal, perf, instance, values) => {
   values = plt.valuesMap.get(elm), values || plt.valuesMap.set(elm, values = {});
   const oldVal = values[memberName];
   // check our new property value against our internal value
-    if (newVal !== oldVal && (
+    newVal !== oldVal && (
   // gadzooks! the property's value has changed!!
   // set our new value!
   // https://youtu.be/dFtLONl4cNc?t=22
-  values[memberName] = newVal, instance = plt.instanceMap.get(elm), instance)) {
-    {
-      const watchMethods = values[WATCH_CB_PREFIX + memberName];
-      if (watchMethods) 
-      // this instance is watching for when this property changed
-      for (let i = 0; i < watchMethods.length; i++) try {
-        // fire off each of the watch methods that are watching this property
-        instance[watchMethods[i]].call(instance, newVal, oldVal, memberName);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    !plt.activeRender && elm['s-rn'] && 
-    // looks like this value actually changed, so we've got work to do!
-    // but only if we've already rendered, otherwise just chill out
-    // queue that we need to do an update, but don't worry about queuing
-    // up millions cuz this function ensures it only runs once
-    queueUpdate(plt, elm, perf);
-  }
+  values[memberName] = newVal, instance = plt.instanceMap.get(elm), instance && !plt.activeRender && elm['s-rn'] && 
+  // looks like this value actually changed, so we've got work to do!
+  // but only if we've already rendered, otherwise just chill out
+  // queue that we need to do an update, but don't worry about queuing
+  // up millions cuz this function ensures it only runs once
+  queueUpdate(plt, elm, perf));
 };
 
 const definePropertyValue = (obj, propertyKey, value) => {
@@ -1265,8 +1280,6 @@ const definePropertyGetterSetter = (obj, propertyKey, get, set) => {
     set
   });
 };
-
-const WATCH_CB_PREFIX = 'wc-';
 
 const initComponentInstance = (plt, elm, hostSnapshot, perf, instance, componentConstructor, queuedEvents, i) => {
   try {
@@ -1405,7 +1418,7 @@ const proxyHostElementPrototype = (plt, membersEntries, hostPrototype, perf) => 
   membersEntries.forEach(([memberName, member]) => {
     // add getters/setters
     const memberType = member.memberType;
-    3 /* PropMutable */ & memberType && true ? 
+    3 /* PropMutable */ & memberType && true && 
     // @Prop() or @Prop({ mutable: true })
     definePropertyGetterSetter(hostPrototype, memberName, function getHostElementProp() {
       // host element getter (cannot be arrow fn)
@@ -1414,11 +1427,7 @@ const proxyHostElementPrototype = (plt, membersEntries, hostPrototype, perf) => 
     }, function setHostElementProp(newValue) {
       // host element setter (cannot be arrow fn)
       setValue(plt, this, memberName, parsePropertyValue(member.propType, newValue), perf);
-    }) : 32 /* Method */ === memberType && 
-    // @Method()
-    // add a placeholder noop value on the host element's prototype
-    // incase this method gets called before setup
-    definePropertyValue(hostPrototype, memberName, noop);
+    });
   });
 };
 
@@ -1662,6 +1671,7 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
       (parentNode = domApi.$parentNode(elm)) && 11 /* DocumentFragment */ === domApi.$nodeType(parentNode) ? parentNode.host : parentNode
     };
     domApi.$setAttributeNS = ((elm, namespaceURI, qualifiedName, val) => elm.setAttributeNS(namespaceURI, qualifiedName, val)), 
+    domApi.$attachShadow = ((elm, shadowRootInit) => elm.attachShadow(shadowRootInit)), 
     win.location.search.indexOf('shadow=false') > 0 && (
     // by adding ?shadow=false it'll force the slot polyfill
     // only add this check when in dev mode
@@ -1710,7 +1720,7 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
         // and components are able to lazy load themselves
         // through standardized browser APIs
         const bundleId = cmpMeta.bundleIds;
-        const useScopedCss = false;
+        const useScopedCss = !domApi.$supportsShadowDom;
         let url = resourcesUrl + bundleId + (useScopedCss ? '.sc' : '') + '.entry.js';
         hmrVersionId && (url += '?s-hmr=' + hmrVersionId), 
         // dynamic es module import() => woot!
@@ -1829,4 +1839,4 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
   // but note that the components have not fully loaded yet
   App.initialized = true;
 })(n, x, w, d, r, h, c);
-})(window,document,{},"App","hydrated",[["hello-world","hello-world",1,[["alt",1,0,1,2],["loaded",16],["loading",2,1,1,4],["src",2,0,1,2],["whatIsAlt",32]]]]);
+})(window,document,{},"App","hydrated",[["lazy-img","lazy-img",1,[["alt",1,0,1,2],["fallback",2,1,1,4],["forceState",1,0,"force-state",4],["height",1,0,1,2],["host",64],["layout",1,0,1,2],["lazing",2,1,1,4],["lazyload",1,0,1,4],["loaded",2,1,1,4],["loading",2,1,1,4],["noloading",1,0,1,4],["sizes",1,0,1,2],["src",1,0,1,2],["srcset",1,0,1,2],["width",1,0,1,2],["withEvents",1,0,"with-events",4]],1]]);

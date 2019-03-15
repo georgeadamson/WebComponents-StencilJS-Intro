@@ -1,0 +1,91 @@
+@import '../../global/common/sass/mixins/index';
+
+:host {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+
+  // The actual <img> element:
+  // .img {
+  //   width: 100%;
+  // }
+
+  .img-loading {
+    // Until the image has loaded we only expose it to screen readers:
+    @include sr-only;
+  }
+
+  // Element to enforce aspect ratio before the image loads:
+  .aspect-wrapper {
+    display: block;
+    position: relative;
+    width: 100%;
+  }
+
+  // Typically we'd rely on the aspect-ratio() mixin which
+  // relies on a :pseudo element to achieve this but we need to
+  // override padding-top using an inline style.
+  // Hence we resort to rendering an element with this className:
+  .aspect-sizer {
+    display: block;
+    visibility: hidden;
+    // Note: padding-top will be set dynamically by the render function via inline style attribute
+    // to define the height as a percentage of width to maintain aspect ratio before the image loads.
+  }
+
+  // Container for any child elements that may have been supplied with slot="placeholder":
+  .placeholder {
+    background-color: var(
+      --img-placeholder-background-color,
+      rgba(0, 164, 182, 0.1)
+    );
+    display: block;
+  }
+
+  // When placeholder is inside aspect-ratio element, make it fill the space:
+  .placeholder,
+  .img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .img-responsive {
+    // Allow img to apply its intrinsic height after loading:
+    &.img-loaded {
+      // This prevents tiny gap below <img> that would be caused if we used inline-block:
+      display: block;
+
+      position: static;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+    }
+  }
+
+  .img-cover {
+    object-fit: cover;
+  }
+
+  .img-contain {
+    object-fit: contain;
+  }
+
+  .loading-indicator {
+    @include spinner($color: #06466d, $delay: 2s);
+  }
+
+  // Container for slot="fallback"
+  .fallback {
+    background: #00a4b6;
+    display: block;
+    padding: 1rem;
+    position: absolute;
+    top: 50%;
+    text-align: center;
+  }
+}

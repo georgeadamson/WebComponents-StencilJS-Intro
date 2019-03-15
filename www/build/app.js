@@ -131,4 +131,4 @@ function createComponentOnReadyPrototype(win, namespace, HTMLElementPrototype) {
 
   init(win, doc, namespace, fsNamespace, resourcesUrl, appCore, appCoreSsr, appCorePolyfilled, hydratedCssClass, components);
 
-  })(window, document, "App","app",0,"app.core.js","es5-build-disabled.js","hydrated","hello-world",HTMLElement.prototype);
+  })(window, document, "App","app",0,"app.core.js","es5-build-disabled.js","hydrated","lazy-img",HTMLElement.prototype);
