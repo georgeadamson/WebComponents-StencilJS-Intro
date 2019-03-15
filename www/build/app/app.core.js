@@ -269,7 +269,7 @@ const attachStyles = (plt, domApi, cmpMeta, hostElm) => {
   // create the style id w/ the host element's mode
   let styleId = cmpMeta.tagNameMeta + DEFAULT_STYLE_MODE;
   let styleTemplate = cmpMeta[styleId];
-  // if (false || true) {
+  // if (false || false) {
     const shouldScopeCss = 2 /* ScopedCss */ === cmpMeta.encapsulationMeta || 1 /* ShadowDom */ === cmpMeta.encapsulationMeta && !plt.domApi.$supportsShadowDom;
   if (shouldScopeCss && (hostElm['s-sc'] = styleTemplate ? getScopeId(cmpMeta, hostElm.mode) : getScopeId(cmpMeta)), 
   styleTemplate) {
@@ -277,18 +277,11 @@ const attachStyles = (plt, domApi, cmpMeta, hostElm) => {
     let styleContainerNode = domApi.$doc.head;
     // if this browser supports shadow dom, then let's climb up
     // the dom and see if we're within a shadow dom
-        if (domApi.$supportsShadowDom) if (1 /* ShadowDom */ === cmpMeta.encapsulationMeta) 
-    // we already know we're in a shadow dom
-    // so shadow root is the container for these styles
-    styleContainerNode = hostElm.shadowRoot; else {
-      // climb up the dom and see if we're in a shadow dom
-      const rootEl = hostElm.getRootNode();
-      rootEl.host && (styleContainerNode = rootEl);
-    }
+        false;
     // if this container element already has these styles
     // then there's no need to apply them again
     // create an object to keep track if we'ready applied this component style
-        let appliedStyles = plt.componentAppliedStyles.get(styleContainerNode);
+    let appliedStyles = plt.componentAppliedStyles.get(styleContainerNode);
     // check if we haven't applied these styles to this container yet
     if (appliedStyles || plt.componentAppliedStyles.set(styleContainerNode, appliedStyles = {}), 
     !appliedStyles[styleId]) {
@@ -965,13 +958,6 @@ const initHostSnapshot = (domApi, cmpMeta, hostElm, hostSnapshot, attribName) =>
   // create a node to represent where the original
   // content was first placed, which is useful later on
   hostElm['s-cr'] = domApi.$createTextNode(''), hostElm['s-cr']['s-cn'] = true, domApi.$insertBefore(hostElm, hostElm['s-cr'], domApi.$childNodes(hostElm)[0])), 
-  1 /* ShadowDom */ === cmpMeta.encapsulationMeta && domApi.$supportsShadowDom && !hostElm.shadowRoot && 
-  // this component is using shadow dom
-  // and this browser supports shadow dom
-  // add the read-only property "shadowRoot" to the host element
-  domApi.$attachShadow(hostElm, {
-    mode: 'open'
-  }), 
   // create a host snapshot object we'll
   // use to store all host data about to be read later
   hostSnapshot = {
@@ -1139,17 +1125,11 @@ const update = async (plt, elm, perf, isInitialLoad, instance, ancestorHostEleme
         const encapsulation = cmpMeta.componentConstructor.encapsulation;
         // test if this component should be shadow dom
         // and if so does the browser supports it
-                const useNativeShadowDom = 'shadow' === encapsulation && plt.domApi.$supportsShadowDom;
+                const useNativeShadowDom = false;
         let reflectHostAttr;
         let rootElm = hostElm;
         if (reflectHostAttr = reflectInstanceValuesToHostAttributes(cmpMeta.componentConstructor.properties, instance), 
-        // this component SHOULD use native slot/shadow dom
-        // this browser DOES support native shadow dom
-        // and this is the first render
-        // let's create that shadow root
-        // test if this component should be shadow dom
-        // and if so does the browser supports it
-        useNativeShadowDom && (rootElm = hostElm.shadowRoot), !hostElm['s-rn']) {
+        !hostElm['s-rn']) {
           // attach the styles this component needs, if any
           // this fn figures out if the styles should go in a
           // shadow root or if they should be global
@@ -1671,7 +1651,6 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
       (parentNode = domApi.$parentNode(elm)) && 11 /* DocumentFragment */ === domApi.$nodeType(parentNode) ? parentNode.host : parentNode
     };
     domApi.$setAttributeNS = ((elm, namespaceURI, qualifiedName, val) => elm.setAttributeNS(namespaceURI, qualifiedName, val)), 
-    domApi.$attachShadow = ((elm, shadowRootInit) => elm.attachShadow(shadowRootInit)), 
     win.location.search.indexOf('shadow=false') > 0 && (
     // by adding ?shadow=false it'll force the slot polyfill
     // only add this check when in dev mode
@@ -1720,7 +1699,7 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
         // and components are able to lazy load themselves
         // through standardized browser APIs
         const bundleId = cmpMeta.bundleIds;
-        const useScopedCss = !domApi.$supportsShadowDom;
+        const useScopedCss = false;
         let url = resourcesUrl + bundleId + (useScopedCss ? '.sc' : '') + '.entry.js';
         hmrVersionId && (url += '?s-hmr=' + hmrVersionId), 
         // dynamic es module import() => woot!
@@ -1839,4 +1818,4 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
   // but note that the components have not fully loaded yet
   App.initialized = true;
 })(n, x, w, d, r, h, c);
-})(window,document,{},"App","hydrated",[["lazy-img","lazy-img",1,[["alt",1,0,1,2],["fallback",2,1,1,4],["forceState",1,0,"force-state",4],["height",1,0,1,2],["host",64],["layout",1,0,1,2],["lazing",2,1,1,4],["lazyload",1,0,1,4],["loaded",2,1,1,4],["loading",2,1,1,4],["noloading",1,0,1,4],["sizes",1,0,1,2],["src",1,0,1,2],["srcset",1,0,1,2],["width",1,0,1,2],["withEvents",1,0,"with-events",4]],1]]);
+})(window,document,{},"App","hydrated",[["lazy-img","lazy-img",1,[["alt",1,0,1,2],["fallback",2,1,1,4],["forceState",1,0,"force-state",4],["height",1,0,1,2],["host",64],["layout",1,0,1,2],["lazing",2,1,1,4],["lazyload",1,0,1,4],["loaded",2,1,1,4],["loading",2,1,1,4],["noloading",1,0,1,4],["sizes",1,0,1,2],["src",1,0,1,2],["srcset",1,0,1,2],["width",1,0,1,2],["withEvents",1,0,"with-events",4]]]]);

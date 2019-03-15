@@ -13,8 +13,8 @@ import observeScrollIntoView from '../../helpers/dom/observeScrollIntoView';
  */
 @Component({
   tag: 'lazy-img',
-  styleUrl: 'img.scss',
-  shadow: true
+  styleUrl: 'img.scss'
+  //,shadow: true
 })
 export class ImgComponent {
   /** Optional. The alternative text description of the image.

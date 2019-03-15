@@ -9,8 +9,7 @@
     "lazy-img": {
       "bundleIds": {
         "$": "lazy-img"
-      },
-      "encapsulation": "shadow"
+      }
     }
   }
 }
