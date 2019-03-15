@@ -297,6 +297,8 @@ const toLowerCase = str => str.toLowerCase();
 
 const dashToPascalCase = str => toLowerCase(str).split('-').map(segment => segment.charAt(0).toUpperCase() + segment.slice(1)).join('');
 
+const noop = () => {};
+
 const updateAttribute = (elm, memberName, newValue, isBooleanAttr = 'boolean' === typeof newValue, isXlinkNs) => {
   isXlinkNs = memberName !== (memberName = memberName.replace(/^xlink\:?/, '')), null == newValue || isBooleanAttr && (!newValue || 'false' === newValue) ? isXlinkNs ? elm.removeAttributeNS(XLINK_NS$1, toLowerCase(memberName)) : elm.removeAttribute(memberName) : 'function' !== typeof newValue && (newValue = isBooleanAttr ? '' : newValue.toString(), 
   isXlinkNs ? elm.setAttributeNS(XLINK_NS$1, toLowerCase(memberName), newValue) : elm.setAttribute(memberName, newValue));
@@ -1198,7 +1200,11 @@ const defineMember = (plt, property, elm, instance, memberName, hostSnapshot, pe
       // component instance prop/state setter (cannot be arrow fn)
       elm = plt.hostElementMap.get(this), elm && (property.state || property.mutable ? setValue(plt, elm, memberName, newValue, perf) : console.warn(`@Prop() "${memberName}" on "${elm.tagName}" cannot be modified.`));
     });
-  } else false;
+  } else property.method && 
+  // @Method()
+  // add a property "value" on the host element
+  // which we'll bind to the instance's method
+  definePropertyValue(elm, memberName, instance[memberName].bind(instance));
 };
 
 const setValue = (plt, elm, memberName, newVal, perf, instance, values) => {
@@ -1230,6 +1236,14 @@ const setValue = (plt, elm, memberName, newVal, perf, instance, values) => {
     // up millions cuz this function ensures it only runs once
     queueUpdate(plt, elm, perf);
   }
+};
+
+const definePropertyValue = (obj, propertyKey, value) => {
+  // minification shortcut
+  Object.defineProperty(obj, propertyKey, {
+    configurable: true,
+    value
+  });
 };
 
 const definePropertyGetterSetter = (obj, propertyKey, get, set) => {
@@ -1363,7 +1377,7 @@ const proxyHostElementPrototype = (plt, membersEntries, hostPrototype, perf) => 
   membersEntries.forEach(([memberName, member]) => {
     // add getters/setters
     const memberType = member.memberType;
-    3 /* PropMutable */ & memberType && true && 
+    3 /* PropMutable */ & memberType && true ? 
     // @Prop() or @Prop({ mutable: true })
     definePropertyGetterSetter(hostPrototype, memberName, function getHostElementProp() {
       // host element getter (cannot be arrow fn)
@@ -1372,7 +1386,11 @@ const proxyHostElementPrototype = (plt, membersEntries, hostPrototype, perf) => 
     }, function setHostElementProp(newValue) {
       // host element setter (cannot be arrow fn)
       setValue(plt, this, memberName, parsePropertyValue(member.propType, newValue), perf);
-    });
+    }) : 32 /* Method */ === memberType && 
+    // @Method()
+    // add a placeholder noop value on the host element's prototype
+    // incase this method gets called before setup
+    definePropertyValue(hostPrototype, memberName, noop);
   });
 };
 
@@ -1756,4 +1774,4 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
   // but note that the components have not fully loaded yet
   App.initialized = true;
 })(n, x, w, d, r, h, c);
-})(window,document,{},"App","hydrated",[["hello-world","hello-world",1,[["alt",1,0,1,2],["loaded",16],["loading",2,1,1,4],["src",1,0,1,2]]]]);
+})(window,document,{},"App","hydrated",[["hello-world","hello-world",1,[["alt",1,0,1,2],["loaded",16],["loading",2,1,1,4],["src",2,0,1,2],["whatIsAlt",32]]]]);

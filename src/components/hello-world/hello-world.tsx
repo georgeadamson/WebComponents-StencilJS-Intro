@@ -1,11 +1,13 @@
-import { Component, Prop, State, Watch } from '@stencil/core';
+import { Component, Prop, State, Watch, Method } from '@stencil/core';
 
 @Component({
   tag: 'hello-world',
   styleUrl: 'hello-world.scss'
 })
 export class DemoImg {
-  @Prop() src: string = 'https://source.unsplash.com/random/400x400';
+  @Prop({ mutable: true }) src: string =
+    'https://source.unsplash.com/random/400x400';
+
   @Prop() alt: string = '';
 
   @Prop({ mutable: true, reflectToAttr: true }) loading: boolean;
@@ -17,6 +19,12 @@ export class DemoImg {
     if (newValue === null || newValue === 'null') {
       throw new Error(`hello-world alt cannot be ${newValue}`);
     }
+  }
+
+  // document.getElementsByTagName('hello-world')[0].whatIsAlt()
+  @Method()
+  whatIsAlt() {
+    console.log(this.alt);
   }
 
   @State() loaded: boolean;

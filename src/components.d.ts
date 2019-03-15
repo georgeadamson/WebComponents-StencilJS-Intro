@@ -17,6 +17,7 @@ export namespace Components {
     'alt': string;
     'loading': boolean;
     'src': string;
+    'whatIsAlt': () => void;
   }
   interface HelloWorldAttributes extends StencilHTMLAttributes {
     'alt'?: string;
