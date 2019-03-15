@@ -208,7 +208,18 @@ const DEFAULT_STYLE_MODE = '$';
 
 /**
  * Key Name to Key Code Map
- */ function getScopeId(cmpMeta, mode) {
+ */ const KEY_CODE_MAP = {
+  'enter': 13,
+  'escape': 27,
+  'space': 32,
+  'tab': 9,
+  'left': 37,
+  'up': 38,
+  'right': 39,
+  'down': 40
+};
+
+function getScopeId(cmpMeta, mode) {
   return 'sc-' + cmpMeta.tagNameMeta + (mode && mode !== DEFAULT_STYLE_MODE ? '-' + mode : '');
 }
 
@@ -1290,7 +1301,24 @@ const initComponentInstance = (plt, elm, hostSnapshot, perf, instance, component
         // define each of the members and initialize what their role is
         defineMember(plt, property, elm, instance, memberName, hostSnapshot, perf);
       });
-    })(plt, componentConstructor, elm, instance, hostSnapshot, perf);
+    })(plt, componentConstructor, elm, instance, hostSnapshot, perf), 
+    // add each of the event emitters which wire up instance methods
+    // to fire off dom events from the host element
+    function initEventEmitters(plt, cmpEvents, instance) {
+      if (cmpEvents) {
+        const elm = plt.hostElementMap.get(instance);
+        cmpEvents.forEach(eventMeta => {
+          instance[eventMeta.method] = {
+            emit: data => plt.emitEvent(elm, eventMeta.name, {
+              bubbles: eventMeta.bubbles,
+              composed: eventMeta.composed,
+              cancelable: eventMeta.cancelable,
+              detail: data
+            })
+          };
+        });
+      }
+    }(plt, componentConstructor.events, instance);
   } catch (e) {
     // something done went wrong trying to create a component instance
     // create a dumby instance so other stuff can load
@@ -1571,9 +1599,29 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
         assignersEventName = eventName + assignerId, assignersUnregListeners && assignersUnregListeners[assignersEventName] && 
         // removed any existing listeners for this event for the assigner element
         // this element already has this listener, so let's unregister it now
-        assignersUnregListeners[assignersEventName](), 'object' === typeof attachTo && (
+        assignersUnregListeners[assignersEventName](), 'string' === typeof attachTo ? 
+        // attachTo is a string, and is probably something like
+        // "parent", "window", or "document"
+        // and the eventName would be like "mouseover" or "mousemove"
+        attachToElm = domApi.$elementRef(assignerElm, attachTo) : 'object' === typeof attachTo ? 
         // we were passed in an actual element to attach to
-        attachToElm = attachTo), attachToElm && (
+        attachToElm = attachTo : (
+        // depending on the event name, we could actually be attaching
+        // this element to something like the document or window
+        splt = eventName.split(':'), splt.length > 1 && (
+        // document:mousemove
+        // parent:touchend
+        // body:keyup.enter
+        attachToElm = domApi.$elementRef(assignerElm, splt[0]), eventName = splt[1])), attachToElm && (
+        // test to see if we're looking for an exact keycode
+        splt = eventName.split('.'), splt.length > 1 && (
+        // looks like this listener is also looking for a keycode
+        // keyup.enter
+        eventName = splt[0], eventListener = (ev => {
+          // wrap the user's event listener with our own check to test
+          // if this keyboard event has the keycode they're looking for
+          ev.keyCode === KEY_CODE_MAP[splt[1]] && listenerCallback(ev);
+        })), 
         // create the actual event listener options to use
         // this browser may not support event options
         eventListenerOpts = domApi.$supportsEventOptions ? {
@@ -1613,13 +1661,19 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
       // otherwise use the parent node
       (parentNode = domApi.$parentNode(elm)) && 11 /* DocumentFragment */ === domApi.$nodeType(parentNode) ? parentNode.host : parentNode
     };
-    return domApi.$setAttributeNS = ((elm, namespaceURI, qualifiedName, val) => elm.setAttributeNS(namespaceURI, qualifiedName, val)), 
+    domApi.$setAttributeNS = ((elm, namespaceURI, qualifiedName, val) => elm.setAttributeNS(namespaceURI, qualifiedName, val)), 
     win.location.search.indexOf('shadow=false') > 0 && (
     // by adding ?shadow=false it'll force the slot polyfill
     // only add this check when in dev mode
     domApi.$supportsShadowDom = false), App.ael || (App.ael = ((elm, eventName, cb, opts) => elm.addEventListener(eventName, cb, opts)), 
-    App.rel = ((elm, eventName, cb, opts) => elm.removeEventListener(eventName, cb, opts))), 
-    domApi;
+    App.rel = ((elm, eventName, cb, opts) => elm.removeEventListener(eventName, cb, opts)));
+    // test if this browser supports event options or not
+    try {
+      win.addEventListener('e', null, Object.defineProperty({}, 'passive', {
+        get: () => domApi.$supportsEventOptions = true
+      }));
+    } catch (e) {}
+    return domApi;
   })(App, win, doc);
   const rootElm = domApi.$doc.documentElement;
   // keep a global set of tags we've already defined
@@ -1704,6 +1758,7 @@ const initHostElement = (plt, cmpMeta, HostElementConstructor, hydratedCssClass,
   // set App Context
   Context.isServer = Context.isPrerender = !(Context.isClient = true), Context.window = win, 
   Context.location = win.location, Context.document = doc, Context.resourcesUrl = Context.publicPath = resourcesUrl, 
+  plt.emitEvent = Context.emit = ((elm, eventName, data) => domApi.$dispatchEvent(elm, Context.eventNameFn ? Context.eventNameFn(eventName) : eventName, data)), 
   // add the h() fn to the app's global namespace
   App.h = h$1, App.Context = Context, 
   // create a method that returns a promise

@@ -1,4 +1,12 @@
-import { Component, Prop, State, Watch, Method } from '@stencil/core';
+import {
+  Component,
+  Prop,
+  State,
+  Watch,
+  Method,
+  Event,
+  EventEmitter
+} from '@stencil/core';
 
 @Component({
   tag: 'hello-world',
@@ -27,6 +35,9 @@ export class DemoImg {
     console.log(this.alt);
   }
 
+  // See: https://stenciljs.com/docs/events
+  @Event() helloWorld: EventEmitter;
+
   @State() loaded: boolean;
 
   componentDidLoad() {
@@ -36,6 +47,7 @@ export class DemoImg {
   onLoad = () => {
     this.loaded = true;
     this.loading = false;
+    this.helloWorld.emit({ yay: 'The event worked!' });
   };
 
   render() {

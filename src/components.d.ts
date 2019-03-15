@@ -22,6 +22,7 @@ export namespace Components {
   interface HelloWorldAttributes extends StencilHTMLAttributes {
     'alt'?: string;
     'loading'?: boolean;
+    'onHelloWorld'?: (event: CustomEvent) => void;
     'src'?: string;
   }
 }
