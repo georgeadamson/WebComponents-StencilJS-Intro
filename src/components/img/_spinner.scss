@@ -2,7 +2,7 @@
 //        @include
 @mixin spinner($size: 48px, $color: #aaa, $delay: 1s, $speed: 1s) {
   display: inline-block;
-  position: relative;
+  //position: relative;
 
   &:after {
     // Size:
