@@ -1,4 +1,5 @@
-@import '../../global/common/sass/mixins/index';
+@import './hide';
+@import './spinner';
 
 :host {
   display: inline-block;

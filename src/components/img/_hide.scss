@@ -1,0 +1,16 @@
+// Styles to hide an element accessibly for screen readers.
+// The opposite of aria-hidden.
+@mixin sr-only() {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 1px;
+
+  // This is necessary to prevent Lighthouse Report from thinking hidden text is too small:
+  font-size: 1rem;
+}

@@ -127,7 +127,7 @@ export class ImgComponent {
 
   componentDidLoad() {
     const { lazyload, lazing, loaded, host, onAwake } = this;
-
+    console.log(this.forceState);
     if (lazyload && lazing && !loaded) {
       // Initialise an Intersection Observer that will tell us when this component is scrolled into viewport:
       const isLazyloadable = observeScrollIntoView.call(this, host, onAwake);
