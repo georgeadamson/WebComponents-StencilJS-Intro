@@ -135,10 +135,6 @@ export class ImgComponent {
       // In browsers that don't support the lazyload technique we must load img immediately :(
       if (!isLazyloadable) {
         onAwake();
-        //   ({
-        //   type: 'lazyloading',
-        //   target: host
-        // } as unknown) as Event
       }
     }
   }
