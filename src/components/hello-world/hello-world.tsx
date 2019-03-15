@@ -1,4 +1,4 @@
-import { Component, Prop, State } from '@stencil/core';
+import { Component, Prop, State, Watch } from '@stencil/core';
 
 @Component({
   tag: 'hello-world',
@@ -9,6 +9,15 @@ export class DemoImg {
   @Prop() alt: string = '';
 
   @Prop({ mutable: true, reflectToAttr: true }) loading: boolean;
+
+  // WARNING! This does not fire when component loads :(
+  // Try: document.getElementsByTagName('hello-world')[0].alt = null
+  @Watch('alt')
+  validateAlt(newValue: string /*, oldValue: string */) {
+    if (newValue === null || newValue === 'null') {
+      throw new Error(`hello-world alt cannot be ${newValue}`);
+    }
+  }
 
   @State() loaded: boolean;
 
